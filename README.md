@@ -11,3 +11,5 @@
 
 ## Stage 4:
 - Further extension: low latency prediction (i.e. faster than the average human reaction time of 250ms )
+
+### Do not push directly to master, always do a PR and request review from 1 other person before merging
