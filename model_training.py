@@ -1,20 +1,3 @@
-'''
-this script is for the training code of Project 2..
-
--------------------------------------------
-INTRO:
-You can change any parts of this code
-
--------------------------------------------
-
-NOTE:
-this file might be incomplete, feel free to contact us
-if you found any bugs or any stuff should be improved.
-Thanks :)
-
-Email:
-txue4133@uni.sydney.edu.au, weiyu.ju@sydney.edu.au
-'''
 
 # import the packages
 import argparse

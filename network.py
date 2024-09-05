@@ -1,10 +1,4 @@
-'''
-this script is for the network of Project 2.
 
-You can change any parts of this code
-
--------------------------------------------
-'''
 import warnings
 from collections import namedtuple
 from functools import partial
