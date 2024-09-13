@@ -32,7 +32,7 @@ class GoogLeNet(nn.Module):
 
     def __init__(
         self,
-        num_classes: int = 25,
+        num_classes: int = 58,
         aux_logits: bool = True,
         transform_input: bool = False,
         init_weights: Optional[bool] = None,

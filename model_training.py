@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser(description= \
 parser.add_argument('--cuda', action='store_true', default=False,
                     help='Used when there are cuda installed.')
 args = parser.parse_args()
-generator = torch.Generator().manual_seed(5307)
+generator = torch.Generator().manual_seed(5308)
 
 # def create_logger(final_output_path):
 #     log_file = '{}.log'.format(time.strftime('%Y-%m-%d-%H-%M'))
@@ -212,6 +212,7 @@ def eval_net(net, loader, logging, mode="baseline"):
 # Normalization, RandomCrop and any other transform you think is useful.
 
 train_transform = transforms.Compose([
+    transforms.Resize(500),
     transforms.RandomCrop(224),
     transforms.ToTensor(), 
     transforms.Normalize((0.564108, 0.50346, 0.427237), (0.20597, 0.206595, 0.21542))
@@ -232,17 +233,17 @@ from torchvision.datasets import ImageFolder
 # ])
 
 
-TrainSet = ImageFolder('../2023_ELEC5307_P2Train/train', transform=train_transform)
-ValSet = ImageFolder('../2023_ELEC5307_P2Train/test', transform=train_transform)
+TrainSet = ImageFolder('./training_set', transform=train_transform)
+ValSet = ImageFolder('./testing_set', transform=train_transform)
 # train_image_path = '../2023_ELEC5307_P2Train/train'
 # validation_image_path = '../2023_ELEC5307_P2Train/test'
 
 # trainset = ImageFolder(train_image_path, train_transform)
 # valset = ImageFolder(validation_image_path, train_transform)
 
-trainloader = torch.utils.data.DataLoader(TrainSet, batch_size=32,
+trainloader = torch.utils.data.DataLoader(TrainSet, batch_size=8,
                                          shuffle=True, num_workers=2)
-valloader = torch.utils.data.DataLoader(ValSet, batch_size=32,
+valloader = torch.utils.data.DataLoader(ValSet, batch_size=8,
                                          shuffle=True, num_workers=2)
 ####################################
 
