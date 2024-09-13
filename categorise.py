@@ -24,8 +24,8 @@ def organize_files_by_prefix(source_folder, destination_base_folder):
             print(f"Moved {filename} to {destination_folder}")
 
 # Define the source folder (where the .txt files are) and the base destination folder
-source_folder = './TrafficSign-test-1'
-destination_base_folder = './testing_set'
+source_folder = '../TrafficSign-test-1'
+destination_base_folder = '../testing_set'
 
 # Call the function to organize the files
 organize_files_by_prefix(source_folder, destination_base_folder)

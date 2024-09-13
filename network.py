@@ -32,7 +32,9 @@ class GoogLeNet(nn.Module):
 
     def __init__(
         self,
-        num_classes: int = 58,
+        # note that the number of classes is set to 50 as we have removed classes 8,9,18,19,25,33,53,57 from the training and testing
+        # sets since they had no more than 5 images in the folders -> i.e. not enough for training.
+        num_classes: int = 50,
         aux_logits: bool = True,
         transform_input: bool = False,
         init_weights: Optional[bool] = None,
