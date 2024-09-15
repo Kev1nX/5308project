@@ -9,11 +9,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
+from torchvision import models
 from torchvision.transforms._presets import ImageClassification
 from torchvision.utils import _log_api_usage_once
 from torchvision.models._api import register_model, Weights, WeightsEnum
 from torchvision.models._meta import _IMAGENET_CATEGORIES
 from torchvision.models._utils import _ovewrite_named_param, handle_legacy_interface
+
+from ultralytics import YOLO
 
 
 __all__ = ["GoogLeNet", "GoogLeNetOutputs", "_GoogLeNetOutputs", "GoogLeNet_Weights", "googlenet"]
@@ -297,3 +300,53 @@ class GoogLeNet_Weights(WeightsEnum):
         },
     )
     DEFAULT = IMAGENET1K_V1
+
+
+class YOLOv8(nn.Module):
+    def __init__(self, model_path='yolov8n.pt', num_classes: int = 80):
+        super(YOLOv8, self).__init__()
+        # Load the YOLOv8 model pre-trained weights (you can change this to 'yolov8n.pt', 'yolov8s.pt', etc.)
+        self.model = YOLO(model_path)
+        
+        # Set the number of classes if training on a custom dataset
+        self.num_classes = num_classes
+
+    def forward(self, x):
+        # Use the YOLOv8 forward pass, which also supports detection
+        results = self.model(x)
+        return results
+
+    def train_model(self, dataloader, num_epochs=10, learning_rate=0.001):
+        # Define optimizer, scheduler, loss, etc., for training
+        optimizer = torch.optim.Adam(self.parameters(), lr=learning_rate)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
+        criterion = torch.nn.CrossEntropyLoss()
+
+        for epoch in range(num_epochs):
+            self.train()  # Set model to training mode
+            for images, targets in dataloader:
+                optimizer.zero_grad()
+                outputs = self(images)  # Forward pass
+                loss = criterion(outputs, targets)  # Calculate loss
+                loss.backward()  # Backward pass
+                optimizer.step()  # Update weights
+
+            scheduler.step()  # Update learning rate
+            print(f"Epoch {epoch}/{num_epochs} completed.")
+
+        return self
+    
+class ResNet18(nn.Module):
+    def __init__(self, num_classes=58, pretrained=True):
+        super(ResNet18, self).__init__()
+        
+        # Load pre-trained ResNet18 model
+        self.model = models.resnet18(pretrained=pretrained)
+        
+        # Modify the final layer to match the number of classes
+        in_features = self.model.fc.in_features
+        self.model.fc = nn.Linear(in_features, num_classes)
+    
+    def forward(self, x):
+        return self.model(x)
+
