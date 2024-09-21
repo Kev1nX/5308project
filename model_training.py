@@ -12,6 +12,7 @@ from torch import nn
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
+import torchvision.transforms.functional as F
 from torchvision.datasets import ImageFolder
 import torch.optim as optim
 
@@ -30,24 +31,18 @@ parser.add_argument('--cuda', action='store_true', default=False,
                     help='Used when there are cuda installed.')
 args = parser.parse_args()
 generator = torch.Generator().manual_seed(5308)
+class SquarePad:
+	def __call__(self, image):
+		w, h = image.size
+		max_wh = np.max([w, h])
+		hp = int((max_wh - w) / 2)
+		vp = int((max_wh - h) / 2)
+		padding = (hp, vp, hp, vp)
+		return F.pad(image, padding, 0, 'constant')
 
-# def create_logger(final_output_path):
-#     log_file = '{}.log'.format(time.strftime('%Y-%m-%d-%H-%M'))
-#     head = '%(asctime)-15s %(message)s'
-#     logging.basicConfig(filename=os.path.join(final_output_path, log_file),
-#                         format=head)
-#     clogger = logging.getLogger()
-#     clogger.setLevel(logging.INFO)
-#     # add handler
-#     # print to stdout and log file
-#     ch = logging.StreamHandler(sys.stdout)
-#     ch.setLevel(logging.INFO)
-#     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-#     ch.setFormatter(formatter)
-#     clogger.addHandler(ch)
-#     return clogger
+# now use it as the replacement of transforms.Pad class
 
-# # basic training process used in last project
+
 def train_net(net, trainloader, valloader,learningrate,nepoch):
 ########## ToDo: Your codes goes below #######
     val_accuracy = 0
@@ -166,6 +161,7 @@ def loss_curve(train_loss,val_loss,epoch,title):
 
     plt.show()
 
+
 def eval_net(net, loader, logging, mode="baseline"):
     net = net.eval()
     if args.cuda:
@@ -212,10 +208,10 @@ def eval_net(net, loader, logging, mode="baseline"):
 # Normalization, RandomCrop and any other transform you think is useful.
 
 train_transform = transforms.Compose([
-    transforms.Resize(500),
-    transforms.RandomCrop(224),
+    SquarePad(),
+    transforms.Resize(size=(224, 224)),
     transforms.ToTensor(), 
-    transforms.Normalize((0.564108, 0.50346, 0.427237), (0.20597, 0.206595, 0.21542))
+    transforms.Normalize((0.4323223, 0.42033324, 0.4274624), (0.19253562, 0.18891077, 0.19183522))
 ])
 
 ####################################
@@ -233,17 +229,17 @@ from torchvision.datasets import ImageFolder
 # ])
 
 
-TrainSet = ImageFolder('./training_set', transform=train_transform)
-ValSet = ImageFolder('./testing_set', transform=train_transform)
+TrainSet = ImageFolder('../training_set', transform=train_transform)
+ValSet = ImageFolder('../testing_set', transform=train_transform)
 # train_image_path = '../2023_ELEC5307_P2Train/train'
 # validation_image_path = '../2023_ELEC5307_P2Train/test'
 
 # trainset = ImageFolder(train_image_path, train_transform)
 # valset = ImageFolder(validation_image_path, train_transform)
 
-trainloader = torch.utils.data.DataLoader(TrainSet, batch_size=8,
+trainloader = torch.utils.data.DataLoader(TrainSet, batch_size=32,
                                          shuffle=True, num_workers=2)
-valloader = torch.utils.data.DataLoader(ValSet, batch_size=8,
+valloader = torch.utils.data.DataLoader(ValSet, batch_size=32,
                                          shuffle=True, num_workers=2)
 ####################################
 
@@ -268,7 +264,7 @@ if __name__ == '__main__':     # this is used for running in Windows
     network = GoogLeNet()
     if args.cuda:
         network = network.cuda()
-    trainloss,valloss,nepoch,epoch_time = train_net(network, trainloader, valloader,0.00014464051511481836,40)
+    trainloss,valloss,nepoch,epoch_time = train_net(network, trainloader, valloader,0.00014464051511481836,10)
     print(trainloss)
     eval_net(network,valloader,"base")
     loss_curve(trainloss,valloss,nepoch,"GoogLeNet")
