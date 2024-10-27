@@ -28,7 +28,13 @@ train_transform = transforms.Compose([
     transforms.ToTensor(), 
     transforms.Normalize((0.4323223, 0.42033324, 0.4274624), (0.19253562, 0.18891077, 0.19183522))
 ])
-
+# change the folder path to the parent folder of the folder storing the images
+# the folder must look like :
+#                            parent_folder_name
+#                             -- image_folder_name
+#                               -- image_1
+#                               -- image_2 ...
+# the parent folder should also not have any other folders besides the image folder.
 ValSet = ImageFolder('../classification_test', transform=train_transform)
 valloader = torch.utils.data.DataLoader(ValSet, batch_size=8,
                                          shuffle=False, num_workers=2)
@@ -56,8 +62,12 @@ def eval_net(net, loader, path):
         print(predicted)
 
 if __name__ == '__main__':     # this is used for running in Windows
+    # make sure to change this to use the correct network for the .pth file
     network = GoogLeNet()
     if args.cuda:
         network = network.cuda()
-
+# change "test" to the name of the .pth file you have in this script's folder
     eval_net(network,valloader,"test")
+
+# after installing all dependencies
+# run the script by moving the terminal to this scipt's directory and running : python .\classify.py or python .\classify.py --cuda
