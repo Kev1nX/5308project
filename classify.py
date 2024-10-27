@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 
 parser = argparse.ArgumentParser(description= \
-                                     'scipt for training of project 2')
+                                     'scipt for classification part of project 2')
 parser.add_argument('--cuda', action='store_true', default=False,
                     help='Used when there are cuda installed.')
 args = parser.parse_args()
@@ -49,7 +49,7 @@ def eval_net(net, loader, path):
         net.load_state_dict(torch.load(path + '.pth', map_location='cuda'))
     else:
         net.load_state_dict(torch.load(path + '.pth', map_location='cpu'))
-        
+    output = []
     for data in loader:
         images, labels = data
         if args.cuda:
@@ -59,7 +59,11 @@ def eval_net(net, loader, path):
             outputs = outputs.cuda()
             labels = labels.cuda()
         _, predicted = torch.max(outputs.data, 1)
-        print(predicted)
+        out = predicted.tolist()
+        for i in out:
+            output.append(i)
+            
+    return output
 
 if __name__ == '__main__':     # this is used for running in Windows
     # make sure to change this to use the correct network for the .pth file
@@ -67,7 +71,10 @@ if __name__ == '__main__':     # this is used for running in Windows
     if args.cuda:
         network = network.cuda()
 # change "test" to the name of the .pth file you have in this script's folder
-    eval_net(network,valloader,"test")
+    results = eval_net(network,valloader,"test")
+    print(results)
 
 # after installing all dependencies
 # run the script by moving the terminal to this scipt's directory and running : python .\classify.py or python .\classify.py --cuda
+# the script will print out in a list, the image classifications
+# the results list object will contain all of the classificaitons
