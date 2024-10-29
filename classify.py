@@ -24,9 +24,10 @@ class SquarePad:
 
 train_transform = transforms.Compose([
     SquarePad(),
-    transforms.Resize(size=(224, 224)),
+    transforms.Resize(500),
+    transforms.CenterCrop(224),
     transforms.ToTensor(), 
-    transforms.Normalize((0.4323223, 0.42033324, 0.4274624), (0.19253562, 0.18891077, 0.19183522))
+    transforms.Normalize((0.564108, 0.50346, 0.427237), (0.20597, 0.206595, 0.21542))
 ])
 # change the folder path to the parent folder of the folder storing the images
 # the folder must look like :
@@ -35,44 +36,56 @@ train_transform = transforms.Compose([
 #                               -- image_1
 #                               -- image_2 ...
 # the parent folder should also not have any other folders besides the image folder.
-ValSet = ImageFolder('../classification_test', transform=train_transform)
-valloader = torch.utils.data.DataLoader(ValSet, batch_size=8,
-                                         shuffle=False, num_workers=2)
 
 
-def eval_net(net, loader, path):
-    net = net.eval()
-    if args.cuda:
-        net = net.cuda()
-        
-    if args.cuda:
-        net.load_state_dict(torch.load(path + '.pth', map_location='cuda'))
-    else:
-        net.load_state_dict(torch.load(path + '.pth', map_location='cpu'))
+def eval_net(net, loader):
     output = []
-    for data in loader:
-        images, labels = data
-        if args.cuda:
-            images, labels = images.cuda(), labels.cuda()
-        outputs = net(images)
-        if args.cuda:
-            outputs = outputs.cuda()
-            labels = labels.cuda()
-        _, predicted = torch.max(outputs.data, 1)
-        out = predicted.tolist()
-        for i in out:
-            output.append(i)
+    try:
+        for data in loader:
+            images, labels = data
+            if args.cuda:
+                images, labels = images.cuda(), labels.cuda()
+            outputs = net(images)
+            if args.cuda:
+                outputs = outputs.cuda()
+                labels = labels.cuda()
+            _, predicted = torch.max(outputs.data, 1)
+            out = predicted.tolist()
+            for i in out:
+                output.append(i)
+                
+            break
+    except FileNotFoundError:
+        print("File moved, retrying")
             
     return output
 
 if __name__ == '__main__':     # this is used for running in Windows
     # make sure to change this to use the correct network for the .pth file
-    network = GoogLeNet()
+    network = ResNet18()
     if args.cuda:
         network = network.cuda()
-# change "test" to the name of the .pth file you have in this script's folder
-    results = eval_net(network,valloader,"test")
-    print(results)
+
+    net = network.eval()
+    if args.cuda:
+        net = net.cuda()
+
+    path = "test"
+        
+    if args.cuda:
+        net.load_state_dict(torch.load(path + '.pth', map_location='cuda'))
+    else:
+        net.load_state_dict(torch.load(path + '.pth', map_location='cpu'))
+    
+    while True:
+        ValSet = ImageFolder('classification_test', transform=train_transform)
+        valloader = torch.utils.data.DataLoader(ValSet, batch_size=8,
+                                         shuffle=False, num_workers=2)
+        
+        results = eval_net(net,valloader)
+        print(results)
+        del ValSet
+        del valloader
 
 # after installing all dependencies
 # run the script by moving the terminal to this scipt's directory and running : python .\classify.py or python .\classify.py --cuda
